@@ -1,9 +1,3 @@
-/*!
- * Simple chat program (server side).cpp - http://github.com/hassanyf
- * Version - 2.0.1
- *
- * Copyright (c) 2016 Hassan M. Yousuf
- */
 
 #include <iostream>
 #include <string.h>
@@ -13,58 +7,54 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
+#define BUFSIZE 30
 
 using namespace std;
+void printboard(char **board,int size);
 
 int main()
 {
-    /* ---------- INITIALIZING VARIABLES ---------- */
 
-    /*  
-       1. client/server are two file descriptors
-       These two variables store the values returned 
-       by the socket system call and the accept system call.
+	int serv_sock;
+    	char message[BUFSIZE];
+	int str_len;
+	struct sockaddr_in serv_addr;
+	struct sockaddr_in clnt_addr;
+	int clnt_addr_size;
+	
+	int size,x,y,count=0,win=0;
+	char **board;
 
-       2. portNum is for storing port number on which
-       the accepts connections
+	// 시간 tm 구조체
+	time_t t = time(NULL);
+	struct tm tm = *localtime(&t);
+	
+	if(argc!=2)
+		{
+			printf("Usage : %s <port>\n", argv[0]);
+			exit(1);
+		}
+	serv_sock=socket(PF_INET,SOCK_DGRAM, 0);
+	if(serv_sock==-1)
+		error_handling("소켓 생성 오류");
 
-       3. isExit is bool variable which will be used to 
-       end the loop
+	memset(&serv_addr, 0, sizeof(serv_addr));
+	serv_addr.sin_family=AF_INET;
+	serv_addr.sin_addr.s_addr=htonl(INADDR_ANY);
+	serv_addr.sin_port=htons(atoi(argv[1]));
 
-       4. The server reads characters from the socket 
-       connection into a dynamic variable (buffer).
+	if (bind(serv_sock,(struct sockaddr*) &serv_addr, sizeof(serv_addr))==1)
+		error_handling("bind() error");
 
-       5. A sockaddr_in is a structure containing an internet 
-       address. This structure is already defined in netinet/in.h, so
-       we don't need to declare it again.
-
-        DEFINITION:
-
-        struct sockaddr_in
-        {
-          short   sin_family;
-          u_short sin_port;
-          struct  in_addr sin_addr;
-          char    sin_zero[8];
-        };
-
-        6. serv_addr will contain the address of the server
-
-        7. socklen_t  is an intr type of width of at least 32 bits
-
-
-    */
-    int client, server;
-    int portNum = 1500;
-    bool isExit = false;
-    int bufsize = 1024;
+	int client, server;
+    	int portNum = 1500;
+   	 bool isExit = false;
+    
     char buffer[bufsize];
 
     struct sockaddr_in server_addr;
     socklen_t size;
-
-    /* ---------- ESTABLISHING SOCKET CONNECTION ----------*/
-    /* --------------- socket() function ------------------*/
 
     client = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -74,23 +64,7 @@ int main()
         exit(1);
     }
 
-    /*
-        The socket() function creates a new socket.
-        It takes 3 arguments,
-
-            a. AF_INET: address domain of the socket.
-            b. SOCK_STREAM: Type of socket. a stream socket in 
-            which characters are read in a continuous stream (TCP)
-            c. Third is a protocol argument: should always be 0. The 
-            OS will choose the most appropiate protocol.
-
-            This will return a small integer and is used for all 
-            references to this socket. If the socket call fails, 
-            it returns -1.
-
-    */
-
-    cout << "\n=> Socket server has been created..." << endl;
+	 cout << "\n=> Socket server has been created..." << endl;
 
     /* 
         The variable serv_addr is a structure of sockaddr_in. 

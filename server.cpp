@@ -93,7 +93,9 @@ int main(int argc, char **argv)
 	printf("클라이언트로 부터 받은 보드판: \n");
 	printboard(board,size);
 	
+	//카운트는 내가한번하면 서버도 한번하므로 2번 올려주고 내가 이겼을땐 거기서 1을 빼줌
 	count+=2;
+	// 카운트가 판의 갯수보다 크거나 같으면 비김 - 꽉찬것
 	if(count>=size*size)
 	{
 		printboard(board,size);
@@ -101,6 +103,7 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
+	//좌표 입력
 	while(1)
 	
 	{
@@ -123,6 +126,7 @@ int main(int argc, char **argv)
 			sendto(serv_sock, board[i], strlen(board[i]),0, (struct sockaddr*)&clnt_addr, sizeof(clnt_addr));
 		break;
 	}
+	//win=0을 보내서 아직 내가 안이겼다는걸 알려줌 , win=1 이 될떄 내가 이김
 	sendto(serv_sock, &win, 4 ,0, (struct sockaddr*)&clnt_addr, sizeof(clnt_addr));
 	for(int i=0;i<size;i++)
 		sendto(serv_sock, board[i], strlen(board[i]),0, (struct sockaddr*)&clnt_addr, sizeof(clnt_addr));

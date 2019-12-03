@@ -1,4 +1,4 @@
-
+#include <stdio.h>
 #include <iostream>
 #include <string.h>
 #include <sys/types.h>
@@ -46,39 +46,27 @@ int main()
 
 	if (bind(serv_sock,(struct sockaddr*) &serv_addr, sizeof(serv_addr))==1)
 		error_handling("bind() error");
+	
+	//size 받기 
+	clnt_addr_size=sizeof(clnt_addr);
+	recvfrom(serv_sock, &size,4, 0, &clnt_addr, &clnt_addr_size);
+		    
+   	 char buffer[bufsize];
 
-	int client, server;
-    	int portNum = 1500;
-   	 bool isExit = false;
-    
-    char buffer[bufsize];
+    	struct sockaddr_in server_addr;
+    	socklen_t size;
 
-    struct sockaddr_in server_addr;
-    socklen_t size;
+    	client = socket(AF_INET, SOCK_STREAM, 0);
 
-    client = socket(AF_INET, SOCK_STREAM, 0);
-
-    if (client < 0) 
-    {
-        cout << "\nError establishing socket..." << endl;
-        exit(1);
-    }
+    	if (client < 0) 
+    	{
+        	cout << "\nError establishing socket..." << endl;
+       		 exit(1);
+  	}
 
 	 cout << "\n=> Socket server has been created..." << endl;
 
-    /* 
-        The variable serv_addr is a structure of sockaddr_in. 
-        sin_family contains a code for the address family. 
-        It should always be set to AF_INET.
-
-        INADDR_ANY contains the IP address of the host. For 
-        server code, this will always be the IP address of 
-        the machine on which the server is running.
-
-        htons() converts the port number from host byte order 
-        to a port number in network byte order.
-
-    */
+    
 
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = htons(INADDR_ANY);

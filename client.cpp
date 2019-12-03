@@ -4,9 +4,10 @@
 
 #define BUFSIZE 30
 
+void error_handling(char *message);
 int main()
 {
-
+	char message[BUFSIZE];
     struct sockaddr_in server_addr;
 
     server_addr.sin_family = AF_INET;
@@ -63,5 +64,9 @@ int checkplace()
 
 void error_handling()
 {
+	fputs(message, stderr);
+	fputc('\n', stderr);
+	exit(1);
 }
+
 

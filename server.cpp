@@ -52,7 +52,7 @@ int main()
 	recvfrom(serv_sock, &size,4, 0,(struct sockaddr*) &clnt_addr, &clnt_addr_size);
 		    
 
-	//이게 아마 보드일듯?
+	//보드 동적 배열 할당
 	board = (char **)malloc (sizeof(char *)* size);
 
 	for(int i=0;i<size;i++)
@@ -65,29 +65,11 @@ int main()
 	printf("client ip: %s \n", inet_ntoa(clnt_addr.sin_addr));
 	// 시간 출력
 	printf("client 접속 시간: %d-%d-%d %d:%d:%d\n", tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday,
-			tm.tm_hour, tm.tm_min, tm.tm_sec);
+			tm.tm_hour, tm.tm_min, tm.tm_sec); 
 
-
-   	 char buffer[bufsize];
-
-    	struct sockaddr_in server_addr;
-    	socklen_t size;
-
-    	client = socket(AF_INET, SOCK_STREAM, 0);
-
-    	if (client < 0) 
-    	{
-        	cout << "\nError establishing socket..." << endl;
-       		 exit(1);
-  	}
-
-	 cout << "\n=> Socket server has been created..." << endl;
-
-    
-
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = htons(INADDR_ANY);
-    server_addr.sin_port = htons(portNum);
+	    server_addr.sin_family = AF_INET;
+            server_addr.sin_addr.s_addr = htons(INADDR_ANY);
+            server_addr.sin_port = htons(portNum);
 
   
     if ((bind(client, (struct sockaddr*)&server_addr,sizeof(server_addr))) < 0) 
@@ -104,49 +86,61 @@ int main()
     if (server < 0) 
         cout << "=> Error on accepting..." << endl;
 
-    while (1) // 이런식으로?? 맞는거 같기도 하고
+    while (1) 
     {
+	//win을 받아서 상대가 이겼을때 1이오고 아니면 0으로    
         recvfrom(serv_sock,&win,4,0, (struct sockaddr*)&clnt_addr, &clnt_addr_size);
-        if (win == 1)
+	//니가 이겼을때 ㅋ
+	if (win == 1)
        	{
 		for(int i=0;i<size;i++)
 			recvfrom(serv_sock, board[i], strlen(board[i]), 0, (struct sockaddr*)&clnt_addr, &clnt_addr_size);
 		printf("클라이언트로 부터 받은 보드판:\n");
 		printboard(board,size);
-		printf("졋을때?");
+		printf("패배하셨습니다!\n");
 		break;
         }
-        }  while (*buffer != '*');
+        
+	//게임 진행 될떄 win =0
+	for(int i=0;i<size;i++)
+		recvfrom(serv_sock, board[i], strlen(board[i]), 0, (struct sockaddr*)&clnt_addr, &clnt_addr_size);
+	printf("클라이언트로 부터 받은 보드판: \n");
+	printboard(board,size);
+	
+	count+=2;
+	if(count>=size*size)
+	{
+		printboard(board,size);
+		printf("비겼습니다!\n");
+		return 0;
+	}
 
-        do {
-            cout << "\nServer: ";
-            do {
-                cin >> buffer;
-                send(server, buffer, bufsize, 0);
-                if (*buffer == '#') {
-                    send(server, buffer, bufsize, 0);
-                    *buffer = '*';
-                    isExit = true;
-                }
-            } while (*buffer != '*');
+	while(1)
+	
+	{
+		printf("좌표 위치 찍기");
+		scanf("%d %d", &x,&y);
+		if(checkplace(board,x,y)==0)
+			break;
+	}
+	board[x][y] = 'O';
+	printboard(board,size);
+	
+	//이겼을때
+	if(checkwin(board,size,x,y)==1)
+	{
+		printf("경기에서 이겼습니다!!!!!!!!!!\n");
+		printf("놓인 횟수: %d \n",count);
+		win =1;
+		sendto(serv_sock, &win, 4 ,0, (struct sockaddr*)&clnt_addr, sizeof(clnt_addr));
+		for(int i=0;i<size;i++)
+			sendto(serv_sock, board[i], strlen(board[i]),0, (struct sockaddr*)&clnt_addr, sizeof(clnt_addr));
+		break;
+	}
+	sendto(serv_sock, &win, 4 ,0, (struct sockaddr*)&clnt_addr, sizeof(clnt_addr));
+	for(int i=0;i<size;i++)
+		sendto(serv_sock, board[i], strlen(board[i]),0, (struct sockaddr*)&clnt_addr, sizeof(clnt_addr));
 
-            cout << "Client: ";
-            do {
-                recv(server, buffer, bufsize, 0);
-                cout << buffer << " ";
-                if (*buffer == '#') {
-                    *buffer == '*';
-                    isExit = true;
-                }
-            } while (*buffer != '*');
-        } while (!isExit);
-
-
-        cout << "\n\n=> Connection terminated with IP " << inet_ntoa(server_addr.sin_addr);
-        close(server);
-        cout << "\nGoodbye..." << endl;
-        isExit = false;
-        exit(1);
     }
 
     close(serv_sock);

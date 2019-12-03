@@ -51,6 +51,21 @@ int main()
 	clnt_addr_size=sizeof(clnt_addr);
 	recvfrom(serv_sock, &size,4, 0,(struct sockaddr*) &clnt_addr, &clnt_addr_size);
 		    
+
+	//이게 아마 보드일듯?
+	board = (char **)malloc (sizeof(char *)* size);
+
+	for(int i=0;i<size;i++)
+		board[i] = (char *)malloc(sizeof(char) *size);
+
+	for(int i=0;i<size;i++)
+		for(int j=0;j<size;j++)
+			board[i][j] ='';
+	//ip
+	printf("client ip: %s \n", inet_ntoa(clnt_addr.sin_addr));
+
+
+
    	 char buffer[bufsize];
 
     	struct sockaddr_in server_addr;
@@ -134,14 +149,21 @@ int main()
         exit(1);
     }
 
-    close(client);
+    close(serv_sock);
     return 0;
 }
 
 void printboard(char **board,int size)
 {
 	for(int i=0;i<size;i++)
-		printf("---|");
+	{
+		for(int j=0;j<size;j++)
+			printf("---|");
+		printf("\n");
+		for(int j=0;j<size;j++)
+			printf("%c |",board[i][j]);
+		printf("\n");
+	}
 	for(int j=0;j<size;j++)
 		printf("---|");
 	printf("\n\n");

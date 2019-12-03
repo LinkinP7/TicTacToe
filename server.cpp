@@ -10,6 +10,7 @@
 #include <time.h>
 #define BUFSIZE 30
 
+void error_handling(char **message);
 int checkplace(char **board,int x,int y);
 int checkwin(char **board, int size, int x, int y);
 void printboard(char **board,int size);
@@ -212,7 +213,10 @@ int checkplace(char **board,int x ,int y)
 	else return 0;
 }
 
-
-
-
+void error_handling(char *message)
+{
+	fputs(message, stderr);
+	fputc('\n', stderr);
+	exit(1);
+}
 

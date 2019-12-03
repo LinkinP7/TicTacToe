@@ -9,13 +9,14 @@
 #include <unistd.h>
 #include <time.h>
 #define BUFSIZE 30
+#pragma GCC diagnostic ignored "-Wwrite-strings"
 
-void error_handling(char **message);
+void error_handling(char *message);
 int checkplace(char **board,int x,int y);
 int checkwin(char **board, int size, int x, int y);
 void printboard(char **board,int size);
 
-int main()
+int main(int argc, char **argv)
 {
 
 	int serv_sock;
@@ -23,7 +24,7 @@ int main()
 	int str_len;
 	struct sockaddr_in serv_addr;
 	struct sockaddr_in clnt_addr;
-	int clnt_addr_size;
+	socklen_t clnt_addr_size;
 	
 	int size,x,y,count=0,win=0;
 	char **board;
@@ -62,16 +63,14 @@ int main()
 
 	for(int i=0;i<size;i++)
 		for(int j=0;j<size;j++)
-			board[i][j] ='';
+			board[i][j] = ' ';
 	//ip 출력
 	printf("client ip: %s \n", inet_ntoa(clnt_addr.sin_addr));
 	// 시간 출력
 	printf("client 접속 시간: %d-%d-%d %d:%d:%d\n", tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday,
 			tm.tm_hour, tm.tm_min, tm.tm_sec); 
 
-	    server_addr.sin_family = AF_INET;
-            server_addr.sin_addr.s_addr = htons(INADDR_ANY);
-            server_addr.sin_port = htons(portNum);      
+	         
 
     while (1) 
     {

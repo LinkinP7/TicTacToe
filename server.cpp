@@ -10,7 +10,7 @@
 #include <time.h>
 #define BUFSIZE 30
 
-using namespace std;
+
 void printboard(char **board,int size);
 
 int main()
@@ -61,9 +61,11 @@ int main()
 	for(int i=0;i<size;i++)
 		for(int j=0;j<size;j++)
 			board[i][j] ='';
-	//ip
+	//ip 출력
 	printf("client ip: %s \n", inet_ntoa(clnt_addr.sin_addr));
-
+	// 시간 출력
+	printf("client 접속 시간: %d-%d-%d %d:%d:%d\n", tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday,
+			tm.tm_hour, tm.tm_min, tm.tm_sec);
 
 
    	 char buffer[bufsize];
@@ -102,21 +104,19 @@ int main()
     if (server < 0) 
         cout << "=> Error on accepting..." << endl;
 
-    while (server > 0) 
+    while (1) // 이런식으로?? 맞는거 같기도 하고
     {
-        strcpy(buffer, "=> Server connected...\n");
-        send(server, buffer, bufsize, 0);
-        cout << "=> Connected with the client #" << clientCount << ", you are good to go..." << endl;
-        cout << "\n=> Enter # to end the connection\n" << endl;
-        cout << "Client: ";
-        do {
-            recv(server, buffer, bufsize, 0);
-            cout << buffer << " ";
-            if (*buffer == '#') {
-                *buffer = '*';
-                isExit = true;
-            }
-        } while (*buffer != '*');
+        recvfrom(serv_sock,&win,4,0, (struct sockaddr*)&clnt_addr, &clnt_addr_size);
+        if (win == 1)
+       	{
+		for(int i=0;i<size;i++)
+			recvfrom(serv_sock, board[i], strlen(board[i]), 0, (struct sockaddr*)&clnt_addr, &clnt_addr_size);
+		printf("클라이언트로 부터 받은 보드판:\n");
+		printboard(board,size);
+		printf("졋을때?");
+		break;
+        }
+        }  while (*buffer != '*');
 
         do {
             cout << "\nServer: ";

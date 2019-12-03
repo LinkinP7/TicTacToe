@@ -10,7 +10,8 @@
 #include <time.h>
 #define BUFSIZE 30
 
-
+int checkplace(char **board,int x,int y);
+int checkwin(char **board, int size, int x, int y);
 void printboard(char **board,int size);
 
 int main()
@@ -69,22 +70,7 @@ int main()
 
 	    server_addr.sin_family = AF_INET;
             server_addr.sin_addr.s_addr = htons(INADDR_ANY);
-            server_addr.sin_port = htons(portNum);
-
-  
-    if ((bind(client, (struct sockaddr*)&server_addr,sizeof(server_addr))) < 0) 
-    {
-        cout << "=> Error binding connection, the socket has already been established..." << endl;
-        return -1;
-    }
-
-    size = sizeof(server_addr);
-    cout << "=> Looking for clients..." << endl;
-    listen(client, 1);
-    server = accept(client,(struct sockaddr *)&server_addr,&size);
-
-    if (server < 0) 
-        cout << "=> Error on accepting..." << endl;
+            server_addr.sin_port = htons(portNum);      
 
     while (1) 
     {
@@ -140,7 +126,6 @@ int main()
 	sendto(serv_sock, &win, 4 ,0, (struct sockaddr*)&clnt_addr, sizeof(clnt_addr));
 	for(int i=0;i<size;i++)
 		sendto(serv_sock, board[i], strlen(board[i]),0, (struct sockaddr*)&clnt_addr, sizeof(clnt_addr));
-
     }
 
     close(serv_sock);
@@ -162,3 +147,72 @@ void printboard(char **board,int size)
 		printf("---|");
 	printf("\n\n");
 }
+
+int checkwin(char **board, int size, int x, int y)
+{
+	int count=0;
+	//세로줄 완성 확인
+	for(int i=0;i<size;i++)
+	{
+		if(board[i][y]!='O')
+			break;
+		else count++;
+	}
+	if(count==size)
+		return 1;
+	else count=0;
+
+	//가로줄 완성 확인
+	for(int i=0;i<size;i++)
+	{
+		if(board[x][i]!='O')
+			break;
+		else count++;
+	}
+	if(count==size)
+		return 1;
+	else count=0;
+
+	//대각선 확인
+	if(x+y==size-1)
+	{
+		for(int i=0;i<size;i++)
+		{
+			if(board[i][size-1-i]!='O')
+				break;
+			else count++;
+		}
+		if(count==size)
+			return 1;
+		else count=0;
+	}
+
+	if(x==y)
+	{
+		for(int i=0;i<size;i++)
+		{
+			if(board[i][i]!='O')
+				break;
+			else count++;
+		}
+		if(count==size)
+			return 1;
+		else count=0;
+	}
+	return 0;
+}
+
+int checkplace(char **board,int x ,int y)
+{
+	if(board[x][y]!=' ')
+	{
+		printf("다시 놓아주세요 !\n\n");
+		return 1;
+	}
+	else return 0;
+}
+
+
+
+
+

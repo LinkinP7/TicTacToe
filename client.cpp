@@ -12,16 +12,9 @@ int main()
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(portNum);
 
-    if (connect(client,(struct sockaddr *)&server_addr, sizeof(server_addr)) == 0)
-        cout << "=> Connection to the server port number: " << portNum << endl;
-
-
-    cout << "=> Awaiting confirmation from the server..." << endl; //line 40
+   
     recv(client, buffer, bufsize, 0);
-    cout << "=> Connection confirmed, you are good to go...";
-
-    cout << "\n\n=> Enter # to end the connection\n" << endl;
-
+   
 
     do {
         cout << "Client: ";
@@ -55,3 +48,20 @@ int main()
     close(client);
     return 0;
 }
+
+int checkwin()
+{
+}
+
+void printboard()
+{
+}
+
+int checkplace()
+{
+}
+
+void error_handling()
+{
+}
+

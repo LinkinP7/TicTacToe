@@ -17,7 +17,7 @@ int main()
     recv(client, buffer, bufsize, 0);
    
 
-    do {
+/*    do {
         cout << "Client: ";
         do {
             cin >> buffer;
@@ -46,7 +46,7 @@ int main()
 
     cout << "\n=> Connection terminated.\nGoodbye...\n";
 
-    close(client);
+    close(client);*/
     return 0;
 }
 

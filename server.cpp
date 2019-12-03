@@ -1,4 +1,4 @@
-
+#include <stdio.h>
 #include <iostream>
 #include <string.h>
 #include <sys/types.h>
@@ -9,11 +9,14 @@
 #include <unistd.h>
 #include <time.h>
 #define BUFSIZE 30
+#pragma GCC diagnostic ignored "-Wwrite-strings"
 
-using namespace std;
+void error_handling(char *message);
+int checkplace(char **board,int x,int y);
+int checkwin(char **board, int size, int x, int y);
 void printboard(char **board,int size);
 
-int main()
+int main(int argc, char **argv)
 {
 
 	int serv_sock;
@@ -21,7 +24,7 @@ int main()
 	int str_len;
 	struct sockaddr_in serv_addr;
 	struct sockaddr_in clnt_addr;
-	int clnt_addr_size;
+	socklen_t clnt_addr_size;
 	
 	int size,x,y,count=0,win=0;
 	char **board;
@@ -46,186 +49,177 @@ int main()
 
 	if (bind(serv_sock,(struct sockaddr*) &serv_addr, sizeof(serv_addr))==1)
 		error_handling("bind() error");
+	
+	//size 받기 
+	clnt_addr_size=sizeof(clnt_addr);
+	recvfrom(serv_sock, &size,4, 0,(struct sockaddr*) &clnt_addr, &clnt_addr_size);
+		    
 
-	int client, server;
-    	int portNum = 1500;
-   	 bool isExit = false;
-    
-    char buffer[bufsize];
+	//보드 동적 배열 할당
+	board = (char **)malloc (sizeof(char *)* size);
 
-    struct sockaddr_in server_addr;
-    socklen_t size;
+	for(int i=0;i<size;i++)
+		board[i] = (char *)malloc(sizeof(char) *size);
 
-    client = socket(AF_INET, SOCK_STREAM, 0);
+	for(int i=0;i<size;i++)
+		for(int j=0;j<size;j++)
+			board[i][j] = ' ';
+	//ip 출력
+	printf("client ip: %s \n", inet_ntoa(clnt_addr.sin_addr));
+	// 시간 출력
+	printf("client 접속 시간: %d-%d-%d %d:%d:%d\n", tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday,
+			tm.tm_hour, tm.tm_min, tm.tm_sec); 
 
-    if (client < 0) 
+	         
+
+    while (1) 
     {
-        cout << "\nError establishing socket..." << endl;
-        exit(1);
+	//win을 받아서 상대가 이겼을때 1이오고 아니면 0으로    
+        recvfrom(serv_sock,&win,4,0, (struct sockaddr*)&clnt_addr, &clnt_addr_size);
+	//니가 이겼을때 ㅋ
+	if (win == 1)
+       	{
+		for(int i=0;i<size;i++)
+			recvfrom(serv_sock, board[i], strlen(board[i]), 0, (struct sockaddr*)&clnt_addr, &clnt_addr_size);
+		printf("클라이언트로 부터 받은 보드판:\n");
+		printboard(board,size);
+		printf("패배하셨습니다!\n");
+		break;
+        }
+        
+	//게임 진행 될떄 win =0
+	for(int i=0;i<size;i++)
+		recvfrom(serv_sock, board[i], strlen(board[i]), 0, (struct sockaddr*)&clnt_addr, &clnt_addr_size);
+	printf("클라이언트로 부터 받은 보드판: \n");
+	printboard(board,size);
+	
+	//카운트는 내가한번하면 서버도 한번하므로 2번 올려주고 내가 이겼을땐 거기서 1을 빼줌
+	count+=2;
+	// 카운트가 판의 갯수보다 크거나 같으면 비김 - 꽉찬것
+	if(count>=size*size)
+	{
+		printboard(board,size);
+		printf("비겼습니다!\n");
+		return 0;
+	}
+
+	//좌표 입력
+	while(1)
+	
+	{
+		printf("좌표 위치 찍기");
+		scanf("%d %d", &x,&y);
+		if(checkplace(board,x,y)==0)
+			break;
+	}
+	board[x][y] = 'O';
+	printboard(board,size);
+	
+	//이겼을때
+	if(checkwin(board,size,x,y)==1)
+	{
+		printf("경기에서 이겼습니다!!!!!!!!!!\n");
+		printf("놓인 횟수: %d \n",count);
+		win =1;
+		sendto(serv_sock, &win, 4 ,0, (struct sockaddr*)&clnt_addr, sizeof(clnt_addr));
+		for(int i=0;i<size;i++)
+			sendto(serv_sock, board[i], strlen(board[i]),0, (struct sockaddr*)&clnt_addr, sizeof(clnt_addr));
+		break;
+	}
+	//win=0을 보내서 아직 내가 안이겼다는걸 알려줌 , win=1 이 될떄 내가 이김
+	sendto(serv_sock, &win, 4 ,0, (struct sockaddr*)&clnt_addr, sizeof(clnt_addr));
+	for(int i=0;i<size;i++)
+		sendto(serv_sock, board[i], strlen(board[i]),0, (struct sockaddr*)&clnt_addr, sizeof(clnt_addr));
     }
 
-	 cout << "\n=> Socket server has been created..." << endl;
-
-    /* 
-        The variable serv_addr is a structure of sockaddr_in. 
-        sin_family contains a code for the address family. 
-        It should always be set to AF_INET.
-
-        INADDR_ANY contains the IP address of the host. For 
-        server code, this will always be the IP address of 
-        the machine on which the server is running.
-
-        htons() converts the port number from host byte order 
-        to a port number in network byte order.
-
-    */
-
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = htons(INADDR_ANY);
-    server_addr.sin_port = htons(portNum);
-
-    /* ---------- BINDING THE SOCKET ---------- */
-    /* ---------------- bind() ---------------- */
-
-
-    if ((bind(client, (struct sockaddr*)&server_addr,sizeof(server_addr))) < 0) 
-    {
-        cout << "=> Error binding connection, the socket has already been established..." << endl;
-        return -1;
-    }
-
-    /* 
-        The bind() system call binds a socket to an address, 
-        in this case the address of the current host and port number 
-        on which the server will run. It takes three arguments, 
-        the socket file descriptor. The second argument is a pointer 
-        to a structure of type sockaddr, this must be cast to
-        the correct type.
-    */
-
-    size = sizeof(server_addr);
-    cout << "=> Looking for clients..." << endl;
-
-    /* ------------- LISTENING CALL ------------- */
-    /* ---------------- listen() ---------------- */
-
-    listen(client, 1);
-
-    /* 
-        The listen system call allows the process to listen 
-        on the socket for connections. 
-
-        The program will be stay idle here if there are no 
-        incomming connections.
-
-        The first argument is the socket file descriptor, 
-        and the second is the size for the number of clients 
-        i.e the number of connections that the server can 
-        handle while the process is handling a particular 
-        connection. The maximum size permitted by most 
-        systems is 5.
-
-    */
-
-    /* ------------- ACCEPTING CLIENTS  ------------- */
-    /* ----------------- listen() ------------------- */
-
-    /* 
-        The accept() system call causes the process to block 
-        until a client connects to the server. Thus, it wakes 
-        up the process when a connection from a client has been 
-        successfully established. It returns a new file descriptor, 
-        and all communication on this connection should be done 
-        using the new file descriptor. The second argument is a 
-        reference pointer to the address of the client on the other 
-        end of the connection, and the third argument is the size 
-        of this structure.
-    */
-
-    int clientCount = 1;
-    server = accept(client,(struct sockaddr *)&server_addr,&size);
-
-    // first check if it is valid or not
-    if (server < 0) 
-        cout << "=> Error on accepting..." << endl;
-
-    while (server > 0) 
-    {
-        strcpy(buffer, "=> Server connected...\n");
-        send(server, buffer, bufsize, 0);
-        cout << "=> Connected with the client #" << clientCount << ", you are good to go..." << endl;
-        cout << "\n=> Enter # to end the connection\n" << endl;
-
-        /* 
-            Note that we would only get to this point after a 
-            client has successfully connected to our server. 
-            This reads from the socket. Note that the read() 
-            will block until there is something for it to read 
-            in the socket, i.e. after the client has executed a 
-            the send().
-
-            It will read either the total number of characters 
-            in the socket or 1024
-        */
-
-        cout << "Client: ";
-        do {
-            recv(server, buffer, bufsize, 0);
-            cout << buffer << " ";
-            if (*buffer == '#') {
-                *buffer = '*';
-                isExit = true;
-            }
-        } while (*buffer != '*');
-
-        do {
-            cout << "\nServer: ";
-            do {
-                cin >> buffer;
-                send(server, buffer, bufsize, 0);
-                if (*buffer == '#') {
-                    send(server, buffer, bufsize, 0);
-                    *buffer = '*';
-                    isExit = true;
-                }
-            } while (*buffer != '*');
-
-            cout << "Client: ";
-            do {
-                recv(server, buffer, bufsize, 0);
-                cout << buffer << " ";
-                if (*buffer == '#') {
-                    *buffer == '*';
-                    isExit = true;
-                }
-            } while (*buffer != '*');
-        } while (!isExit);
-
-        /* 
-            Once a connection has been established, both ends 
-            can both read and write to the connection. Naturally, 
-            everything written by the client will be read by the 
-            server, and everything written by the server will be 
-            read by the client.
-        */
-
-        /* ---------------- CLOSE CALL ------------- */
-        /* ----------------- close() --------------- */
-
-        /* 
-            Once the server presses # to end the connection,
-            the loop will break and it will close the server 
-            socket connection and the client connection.
-        */
-
-        // inet_ntoa converts packet data to IP, which was taken from client
-        cout << "\n\n=> Connection terminated with IP " << inet_ntoa(server_addr.sin_addr);
-        close(server);
-        cout << "\nGoodbye..." << endl;
-        isExit = false;
-        exit(1);
-    }
-
-    close(client);
+    close(serv_sock);
     return 0;
 }
+
+void printboard(char **board,int size)
+{
+	for(int i=0;i<size;i++)
+	{
+		for(int j=0;j<size;j++)
+			printf("---|");
+		printf("\n");
+		for(int j=0;j<size;j++)
+			printf("%c |",board[i][j]);
+		printf("\n");
+	}
+	for(int j=0;j<size;j++)
+		printf("---|");
+	printf("\n\n");
+}
+
+int checkwin(char **board, int size, int x, int y)
+{
+	int count=0;
+	//세로줄 완성 확인
+	for(int i=0;i<size;i++)
+	{
+		if(board[i][y]!='O')
+			break;
+		else count++;
+	}
+	if(count==size)
+		return 1;
+	else count=0;
+
+	//가로줄 완성 확인
+	for(int i=0;i<size;i++)
+	{
+		if(board[x][i]!='O')
+			break;
+		else count++;
+	}
+	if(count==size)
+		return 1;
+	else count=0;
+
+	//대각선 확인
+	if(x+y==size-1)
+	{
+		for(int i=0;i<size;i++)
+		{
+			if(board[i][size-1-i]!='O')
+				break;
+			else count++;
+		}
+		if(count==size)
+			return 1;
+		else count=0;
+	}
+
+	if(x==y)
+	{
+		for(int i=0;i<size;i++)
+		{
+			if(board[i][i]!='O')
+				break;
+			else count++;
+		}
+		if(count==size)
+			return 1;
+		else count=0;
+	}
+	return 0;
+}
+
+int checkplace(char **board,int x ,int y)
+{
+	if(board[x][y]!=' ')
+	{
+		printf("다시 놓아주세요 !\n\n");
+		return 1;
+	}
+	else return 0;
+}
+
+void error_handling(char *message)
+{
+	fputs(message, stderr);
+	fputc('\n', stderr);
+	exit(1);
+}
+

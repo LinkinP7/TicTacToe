@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <sys/socket.h>
 #define BUFSIZE 30
 
 void error_handling(char *message);

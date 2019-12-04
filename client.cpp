@@ -49,43 +49,68 @@ int main(int argc, char **argv)
 		for(int j=0;j<size;j++)
 			board[i][j] = ' ';
 
+	sendto(sock, &size, 4, 0, (struct sockaddr*)&serv_addr , sizeof(serv_addr));
+	addr_size=sizeof(from_addr);
+	printboard(board,size);
 
+	while(1)
+	{
+		while(1)
+		{
+			printf("위치를 입력하세요 : "); scanf("%d %d",&x,&y);
+			if(checkplace(board,x,y)==0)
+				break;
+		}
+		board[x][y] = 'X';
 
+		count+=2;
 
+		if(count>=size*size)
+		{
+			sendto(sock, &win, 4, 0, (struct sockaddr*)&serv_addr , sizeof(serv_addr));
+			printboard(board,size);
+			for(int i=0;i<size;i++)
+				sendto(sock, board[i], strlen(board[i]), 0, (struct sockaddr*)&serv_addr , sizeof(serv_addr));
+			printf("비겼습니다 !\n");
+			break;
+		}
+		else
+			printboard(board,size);
 
+		if(checkwin(board,size,x,y)==1)
+		{
+			printf("경기에서 이겼습니다 !!!!!!!!!\n");
+			printf("놓인 횟수 : %d \n",count-1);
+			win=1;
+			sendto(sock, &win, 4, 0, (struct sockaddr*)&serv_addr , sizeof(serv_addr));
 
+			for(int i=0;i<size;i++)
+				sendto(sock, board[i], strlen(board[i]), 0, (struct sockaddr*)&serv_addr , sizeof(serv_addr));
+			break;
+		}
 
-/*    do {
-        cout << "Client: ";
-        do {
-            cin >> buffer;
-            send(client, buffer, bufsize, 0);
-            if (*buffer == '#') {
-                send(client, buffer, bufsize, 0);
-                *buffer = '*';
-                isExit = true;
-            }
-        } while (*buffer != 42);
+		sendto(sock, &win, 4, 0, (struct sockaddr*)&serv_addr , sizeof(serv_addr));
+		for(int i=0;i<size;i++)
+			sendto(sock, board[i], strlen(board[i]), 0, (struct sockaddr*)&serv_addr , sizeof(serv_addr));
+		recvfrom(sock, &win, 4, 0, (struct sockaddr*)&from_addr, &addr_size);
+		if(win==1)
+		{
+			for(int i=0;i<size;i++)
+				recvfrom(sock, board[i], strlen(board[i]), 0, (struct sockaddr*)&from_addr, &addr_size);
+			printf("서버로 부터 받은 보드판 : \n");
+			printboard(board,size);
+			printf("패배하셨습니다 !\n");
+			break;
+		}
 
-        cout << "Server: ";
-        do {
-            recv(client, buffer, bufsize, 0);
-            cout << buffer << " ";
-            if (*buffer == '#') {
-                *buffer = '*';
-                isExit = true;
-            }
+		for(int i=0;i<size;i++)
+			recvfrom(sock, board[i], strlen(board[i]), 0, (struct sockaddr*)&from_addr, &addr_size);
+		printf("서버로 부터 받은 보드판 : \n");
+		printboard(board,size);
+	}
 
-        } while (*buffer != 42);
-        cout << endl;
-
-    } while (!isExit);
-
-
-    cout << "\n=> Connection terminated.\nGoodbye...\n";
-
-    close(client);*/
-    return 0;
+	close(sock);
+	return 0;
 }
 
 int checkwin(char **board, int size, int x, int y)

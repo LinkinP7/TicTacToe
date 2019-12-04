@@ -87,8 +87,55 @@ int main(int argc, char **argv)
     return 0;
 }
 
-int checkwin()
+int checkwin(char **board, int size, int x, int y)
 {
+	int count=0;
+	for(int i=0;i<size;i++)
+	{
+		if(board[i][y]!='X')
+			break;
+		else count++;
+	}
+	if(count==size)
+		return 1;
+	else count=0;
+
+	for(int i=0;i<size;i++)
+	{
+		if(board[x][i]!='X')
+			break;
+		else count++;
+	}
+	if(count==size)
+		return 1;
+	else count=0;
+
+	if(x+y==size-1)
+	{
+		for(int i=0;i<size;i++)
+		{
+			if(board[i][size-1-i]!='X')
+				break;
+			else count++;
+		}
+		if(count==size)
+			return 1;
+		else count=0;
+	}
+
+	if(x==y)
+	{
+		for(int i=0;i<size;i++)
+		{
+			if(board[i][i]!='X')
+				break;
+			else count++;
+		}
+		if(count==size)
+			return 1;
+		else count=0;
+	}
+	return 0;
 }
 
 void printboard(char **board,int size)

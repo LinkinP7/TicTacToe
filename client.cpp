@@ -12,7 +12,9 @@ int main()
 	int size,count=0;
 	char **board;
 
-
+	board = (char **)malloc (sizeof(char *) * size);
+	for(int i=0;i<size;i++)
+		board[i] = (char *)malloc(sizeof(char) *size);
     struct sockaddr_in server_addr;
 
     server_addr.sin_family = AF_INET;

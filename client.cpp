@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #define BUFSIZE 30
 
+int checkplace(char **board,int x,int y);
 void printboard(char **board,int size);
 void error_handling(char *message);
 int main(int argc, char **argv)
@@ -46,6 +47,8 @@ int main(int argc, char **argv)
 	for(int i=0;i<size;i++)
 		for(int j=0;j<size;j++)
 			board[i][j] = ' ';
+
+
 
 
 
@@ -105,8 +108,13 @@ void printboard(char **board,int size)
 	printf("\n\n");
 }
 
-int checkplace()
+int checkplace(char **board, int x, int y)
 {
+	if(board[x][y]!=' ')
+	{
+		printf("다시 놓아주세요 !\n\n");	return 1;
+	}
+	else return 0;
 }
 
 void error_handling(char *message)

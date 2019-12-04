@@ -4,10 +4,15 @@
 #include <sys/socket.h>
 #define BUFSIZE 30
 
+void printboard(char **board,int size);
 void error_handling(char *message);
 int main()
 {
 	char message[BUFSIZE];
+	int size,count=0;
+	char **board;
+
+
     struct sockaddr_in server_addr;
 
     server_addr.sin_family = AF_INET;
@@ -56,6 +61,19 @@ int checkwin()
 
 void printboard()
 {
+	for(int i=0;i<size;i++)
+	{
+		for(int j=0;j<size;j++)
+			printf("---|");
+		printf("\n");
+
+		for(int j=0;j<size;j++)
+			printf("%c  |",board[i][j]);
+		printf("\n");
+	}
+	for(int j=0;j<size;j++)
+		printf("---|");
+	printf("\n\n");
 }
 
 int checkplace()

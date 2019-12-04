@@ -3,7 +3,6 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -34,10 +33,10 @@ int main(int argc, char **argv)
 	struct tm tm = *localtime(&t);
 	
 	if(argc!=2)
-		{
-			printf("Usage : %s <port>\n", argv[0]);
-			exit(1);
-		}
+	{
+		printf("Usage : %s <port>\n", argv[0]);
+		exit(1);
+	}
 	serv_sock=socket(PF_INET,SOCK_DGRAM, 0);
 	if(serv_sock==-1)
 		error_handling("소켓 생성 오류");
@@ -52,9 +51,8 @@ int main(int argc, char **argv)
 	
 	//size 받기 
 	clnt_addr_size=sizeof(clnt_addr);
-	recvfrom(serv_sock, &size,4, 0,(struct sockaddr*) &clnt_addr, &clnt_addr_size);
+	recvfrom(serv_sock, &size,4, 0,(struct sockaddr*)&clnt_addr, &clnt_addr_size);
 		    
-
 	//보드 동적 배열 할당
 	board = (char **)malloc (sizeof(char *)* size);
 
@@ -107,7 +105,7 @@ int main(int argc, char **argv)
 	while(1)
 	
 	{
-		printf("좌표 위치 찍기");
+		printf("위치를 입력하세요 : ");
 		scanf("%d %d", &x,&y);
 		if(checkplace(board,x,y)==0)
 			break;
@@ -144,7 +142,7 @@ void printboard(char **board,int size)
 			printf("---|");
 		printf("\n");
 		for(int j=0;j<size;j++)
-			printf("%c |",board[i][j]);
+			printf("%c  |",board[i][j]);
 		printf("\n");
 	}
 	for(int j=0;j<size;j++)

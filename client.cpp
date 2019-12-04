@@ -6,23 +6,30 @@
 
 void printboard(char **board,int size);
 void error_handling(char *message);
-int main()
+int main(int argc, char **argv)
 {
 	char message[BUFSIZE];
 	int size,count=0;
 	char **board;
 
+       	struct sockaddr_in server_addr;
+	struct sockaddr_in from_addr;
+
+	server_addr.sin_family = AF_INET;
+	serv_addr.sin_addr.s_addr=inet_addr(argv[1]);
+	server_addr.sin_port = htons(atoi(argv[2]));
+
 	board = (char **)malloc (sizeof(char *) * size);
 	for(int i=0;i<size;i++)
 		board[i] = (char *)malloc(sizeof(char) *size);
-    struct sockaddr_in server_addr;
 
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(portNum);
+	for(int i=0;i<size;i++)
+		for(int j=0;j<size;j++)
+			board[i][j] = ' ';
 
-   
-    recv(client, buffer, bufsize, 0);
-   
+
+
+
 
 /*    do {
         cout << "Client: ";

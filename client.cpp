@@ -11,7 +11,7 @@ void printboard(char **board,int size);
 void error_handling(char *message);
 int main(int argc, char **argv)
 {
-	int soxk;
+	int sock;
 	char message[BUFSIZE];
 	int str_len;
 	int size,count=0;
@@ -88,7 +88,7 @@ int checkwin()
 {
 }
 
-void printboard()
+void printboard(char **board,int size)
 {
 	for(int i=0;i<size;i++)
 	{
@@ -109,7 +109,7 @@ int checkplace()
 {
 }
 
-void error_handling()
+void error_handling(char *message)
 {
 	fputs(message, stderr);
 	fputc('\n', stderr);

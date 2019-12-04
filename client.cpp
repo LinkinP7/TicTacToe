@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #define BUFSIZE 30
 
+int checkwin(char **board, int size,int x,int y);
 int checkplace(char **board,int x,int y);
 void printboard(char **board,int size);
 void error_handling(char *message);
@@ -16,8 +17,9 @@ int main(int argc, char **argv)
 	int sock;
 	char message[BUFSIZE];
 	int str_len;
-	int size,count=0;
+	int size,x,y,count=0,win=0;
 	char **board;
+	char addr_size;
 
        	struct sockaddr_in serv_addr;
 	struct sockaddr_in from_addr;

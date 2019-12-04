@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#pragma GCC diagnostic ignored "-Wwrite-strings"
 #define BUFSIZE 30
 
 int checkwin(char **board, int size,int x,int y);
@@ -19,7 +20,7 @@ int main(int argc, char **argv)
 	int str_len;
 	int size,x,y,count=0,win=0;
 	char **board;
-	char addr_size;
+	socklen_t addr_size;
 
        	struct sockaddr_in serv_addr;
 	struct sockaddr_in from_addr;

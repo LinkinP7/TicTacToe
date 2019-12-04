@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 	int size,count=0;
 	char **board;
 
-       	struct sockaddr_in server_addr;
+       	struct sockaddr_in serv_addr;
 	struct sockaddr_in from_addr;
 
 	if(argc!=3)
@@ -31,11 +31,11 @@ int main(int argc, char **argv)
 	if(sock==-1)
 		error_handling("socket() error");
 
-	memset(&serv_addr, 0, sizeof(serv_addr));
+	wmemset(&serv_addr, 0, sizeof(serv_addr));
 
-	server_addr.sin_family = AF_INET;
+	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr=inet_addr(argv[1]);
-	server_addr.sin_port = htons(atoi(argv[2]));
+	serv_addr.sin_port = htons(atoi(argv[2]));
 
 	printf("게임의 사이즈를 입력하세요 : "); scanf("%d",&size);
 

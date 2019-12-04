@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #define BUFSIZE 30
@@ -31,7 +32,7 @@ int main(int argc, char **argv)
 	if(sock==-1)
 		error_handling("socket() error");
 
-	wmemset(&serv_addr, 0, sizeof(serv_addr));
+	memset(&serv_addr, 0, sizeof(serv_addr));
 
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr=inet_addr(argv[1]);

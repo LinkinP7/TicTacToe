@@ -1,6 +1,9 @@
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 #define BUFSIZE 30
 
@@ -8,17 +11,34 @@ void printboard(char **board,int size);
 void error_handling(char *message);
 int main(int argc, char **argv)
 {
+	int soxk;
 	char message[BUFSIZE];
+	int str_len;
 	int size,count=0;
 	char **board;
 
        	struct sockaddr_in server_addr;
 	struct sockaddr_in from_addr;
 
+	if(argc!=3)
+	{
+		printf("Usage : %s <IP> <PORT>\n", argv[0]);
+		exit(1);
+	}
+
+	sock=socket(PF_INET, SOCK_DGRAM,0);
+	if(sock==-1)
+		error_handling("socket() error");
+
+	memset(&serv_addr, 0, sizeof(serv_addr));
+
 	server_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr=inet_addr(argv[1]);
 	server_addr.sin_port = htons(atoi(argv[2]));
 
+	printf("게임의 사이즈를 입력하세요 : "); scanf("%d",&size);
+
+	//이차원 배열 동적 할당
 	board = (char **)malloc (sizeof(char *) * size);
 	for(int i=0;i<size;i++)
 		board[i] = (char *)malloc(sizeof(char) *size);
